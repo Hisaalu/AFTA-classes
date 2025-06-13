@@ -6,37 +6,41 @@ API_URL = "http://127.0.0.1:8000"
 st.set_page_config(page_title="School Loan System")
 st.title("🏫 School Loan Calculator")
 
-menu = st.sidebar.selectbox("Menu", ["Save Monthly Amount", "Request Loan"])
+menu = st.sidebar.radio("Select Option", ["Register Savings Plan", "Check Loan Eligibility"])
 
-if menu == "Save Monthly Amount":
-    st.subheader("🏦 Submit Your Monthly Saving")
+if menu == "Register Savings Plan":
+    st.subheader("📅 Monthly Saving Setup")
     user_id = st.text_input("Enter your User ID")
-    amount = st.number_input("Enter Monthly Saving Amount", min_value=0.0, step=100.0)
+    monthly_saving = st.number_input("Monthly Saving (UGX)", min_value=0.0, step=100.0)
 
-    if st.button("Save"):
-        if user_id and amount > 0:
-            response = requests.post(f"{API_URL}/save", json={
+    if st.button("Register Plan"):
+        if user_id and monthly_saving > 0:
+            res = requests.post(f"{API_URL}/save", json={
                 "user_id": user_id,
-                "monthly_saving": amount
+                "monthly_saving": monthly_saving
             })
-            if response.status_code == 200:
-                st.success("Savings recorded successfully!")
+            if res.status_code == 200:
+                st.success("Your Monthly Saving Plan has been Saved")
+                st.info(f"Saving started on: {res.json()['start_date']}")
             else:
-                st.error(response.json().get("detail"))
+                st.error(res.json().get("detail"))
         else:
-            st.warning("Please enter valid details.")
+            st.warning("Please fill in all feilds.")
 
-elif menu == "Request Loan":
-    st.subheader("💰 Check Loan Eligibility")
+elif menu == "Check Loan Eligibility":
+    st.subheader("💳 Loan Estimator")
     user_id = st.text_input("Enter your User ID")
 
-    if st.button("Check Loan"):
+    if st.button("Calculate Loan"):
         if user_id:
-            response = requests.post(f"{API_URL}/loan", json={"user_id": user_id})
-            if response.status_code == 200:
-                loan = response.json()["loan_eligible_amount"]
-                st.success(f"You're eligible for a loan of UGX {loan:,.0f}")
+            res = requests.post(f"{API_URL}/loan", json={"user_id": user_id})
+            if res.status_code == 200:
+                data = res.json()
+                st.success(f"Start Date: {data['start_date']}")
+                st.info(f"Months Saved: {data['months_saved']}")
+                st.success(f"Total Saved: UGX {data['total_saved']:,.0f}")
+                st.success(f"Loan Eligible: UGX {data['loan_eligible_amount']:,.0f}")
             else:
-                st.error(response.json().get("detail"))
+                st.error(res.json().get("detail"))
         else:
             st.warning("Please enter your User ID.")
