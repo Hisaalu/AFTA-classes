@@ -1,12 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
+import pandas as pd
+import os
 #from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-#temporary in memory storage
-savings_data = {}
+CSV_FILE = "savings.csv"
+
+#creating csv file
+if not os.path.exists(CSV_FILE):
+    df = pd.DataFrame(columns = ["user_id", "monthly_svings","start_date"])
+    df.to_csv(CSV_FILE, index = False)
 
 #pydantic models
 class MonthlySavingsRequest(BaseModel):
@@ -18,43 +24,48 @@ class LoanRequest(BaseModel):
 
 #saving the users yearly saving
 @app.post("/save")
-def save_monthly_saving(data: MonthlySavingsRequest):
-    if data.user_id in savings_data:
-        raise HTTPException(status_code = 400, deatail= "Saving already recorded for this user.")
-    
-    savings_data[data.user_id] = {
-        "monthly_saving": data.monthly_saving,
-        "start_date": datetime.today().strftime('%Y-%m-%d') 
-        }
+def save_monthly_plan(data: MonthlySavingsRequest):
+    df = pd.read_csv(CSV_FILE)
 
-    return {
-        "message": f"Saving plan of UGX {data.monthly_saving:,.0f}/month recorded.",
-        "start_date": savings_data[data.user_id]["start_date"]
-        }
+
+    if data.user_id in df["user_id"].values:
+        raise HTTPException(status_code = 400, deatail= "User already registered.")
+    
+    new_entry = pd,DataFrame([{
+        "user_id": data.user_id,
+        "monthly_saving": data.monthly_saving,
+        "start_date": datetime.today().strftime('%Y-%m-%d')
+    }])
+
+    df = pd.concat([df, new_entry], ignore_index = True)
+    df.to_csv(CSV_FILE, index=False)
+
+    return {"message": "Saved successfully", "start_date": new_entry.iloc[0]["start_date"]}
+
 
 # Calculate and return loan amount
 @app.post("/loan")
 def calculate_loan(data: LoanRequest):
-    user_info = savings_data.get(data.user_id)
-    if not user_info:
+    df = pd.read_csv(CSV_FILE)
+    user_row = df[df["user_id"] == data.user_id]
+
+    if user_row.empty:
         raise HTTPException(status_code=404, detail="User not found.")
     
-
-    start_date = datetime.strptime(user_info["start_date"], '%Y-%m-%d')
+    monthly = float(user_row["monthly_saving"].values[0])
+    start_date = datetime.strptime(user_row["start_date"].values[0], '%Y-%m-%d')
     today = datetime.today()
-
     months_saved = (today.year - start_date.year) * 12 + (today.month - start_date.month)
     months_saved = max(1, months_saved)
 
-    monthly_saving = user_info["monthly_saving"]
-    total_saved = monthly_saving * months_saved
+    total_saved = monthly * months_saved
     loan_amount = total_saved * 2
     
      
     return {
-        "user_id": data.user_id, 
-        "start_date": user_info["start_date"],
+        "user_id": data.user_id,
         "months_saved": months_saved,
         "total_saved": total_saved,
-        "loan_eligible_amount": loan_amount
+        "loan_eligible_amount": loan_amount,
+        "start_date": start_date.date()
         }

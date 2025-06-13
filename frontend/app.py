@@ -1,46 +1,59 @@
 import streamlit as st
+import pandas as pd
 import requests
+import os
 
 API_URL = "http://127.0.0.1:8000"
+CSV_FILE = "savings.csv"
 
 st.set_page_config(page_title="School Loan System")
 st.title("🏫 School Loan Calculator")
 
-menu = st.sidebar.radio("Select Option", ["Register Savings Plan", "Check Loan Eligibility"])
+menu = st.sidebar.radio("Select Option", ["Register Savings Plan", "Check Loan Eligibility", "Download CSV"])
 
 if menu == "Register Savings Plan":
-    st.subheader("📅 Monthly Saving Setup")
-    user_id = st.text_input("Enter your User ID")
-    monthly_saving = st.number_input("Monthly Saving (UGX)", min_value=0.0, step=100.0)
+    st.subheader("📅 Enter Monthly Savings")
+    user_id = st.text_input("User ID")
+    monthly = st.number_input("Monthly Saving (UGX)", step=1000.0)
 
-    if st.button("Register Plan"):
-        if user_id and monthly_saving > 0:
+    if st.button("Save"):
             res = requests.post(f"{API_URL}/save", json={
                 "user_id": user_id,
-                "monthly_saving": monthly_saving
+                "monthly_saving": monthly
             })
             if res.status_code == 200:
-                st.success("Your Monthly Saving Plan has been Saved")
-                st.info(f"Saving started on: {res.json()['start_date']}")
+                st.success(res.json()["message"])
             else:
                 st.error(res.json().get("detail"))
-        else:
-            st.warning("Please fill in all feilds.")
 
 elif menu == "Check Loan Eligibility":
-    st.subheader("💳 Loan Estimator")
-    user_id = st.text_input("Enter your User ID")
+    st.subheader("💳 Check Loan Eligibility")
+    user_id = st.text_input("User ID")
 
-    if st.button("Calculate Loan"):
+    if st.button("Get Loan Info"):
         if user_id:
             res = requests.post(f"{API_URL}/loan", json={"user_id": user_id})
             if res.status_code == 200:
                 data = res.json()
-                st.success(f"Start Date: {data['start_date']}")
-                st.info(f"Months Saved: {data['months_saved']}")
-                st.success(f"Total Saved: UGX {data['total_saved']:,.0f}")
+                st.success(f"Months Saved: {data['months_saved']}")
+                st.info(f"Total Saved: UGX {data['total_saved']:,.0f}")
                 st.success(f"Loan Eligible: UGX {data['loan_eligible_amount']:,.0f}")
             else:
                 st.error(res.json().get("detail"))
-        else:
-            st.warning("Please enter your User ID.")
+
+elif menu == "Download CSV":
+    st.subheader("📁 Current Savings Data")
+    if os.path.exists(CSV_FILE):
+        df = pd.read_csv(CSV_FILE)
+        st.dataframe(df)
+
+        csv = df.to_csv(index=False).encode('utf-8')
+        st.download_button("📤 Download CSV", data=csv, file_name="savings.csv", mime='text/csv')
+
+        uploaded_file = st.file_uploader("🔄 Upload updated CSV", type="csv")
+        if uploaded_file:
+            df_new = pd.read_csv(uploaded_file)
+            df_new.to_csv(CSV_FILE, index=False)
+            st.success("Uploaded and replaced savings file.")
+    else:
+        st.warning("CSV file not found.")
