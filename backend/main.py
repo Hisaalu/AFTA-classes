@@ -31,7 +31,7 @@ def save_monthly_plan(data: MonthlySavingsRequest):
     if data.user_id in df["user_id"].values:
         raise HTTPException(status_code = 400, deatail= "User already registered.")
     
-    new_entry = pd,DataFrame([{
+    new_entry = pd.DataFrame([{
         "user_id": data.user_id,
         "monthly_saving": data.monthly_saving,
         "start_date": datetime.today().strftime('%Y-%m-%d')
