@@ -7,11 +7,14 @@ import os
 
 app = FastAPI()
 
-CSV_FILE = "savings.csv"
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+CSV_FILE = os.path.join(BASE_DIR, "../shared_data/savings.csv")
+
+#print("📁 BACKEND SAVINGS PATH:", CSV_FILE)
 
 #creating csv file
 if not os.path.exists(CSV_FILE):
-    df = pd.DataFrame(columns = ["user_id", "monthly_svings","start_date"])
+    df = pd.DataFrame(columns = ["user_id", "monthly_saving","start_date"])
     df.to_csv(CSV_FILE, index = False)
 
 #pydantic models
@@ -28,11 +31,11 @@ def save_monthly_plan(data: MonthlySavingsRequest):
     df = pd.read_csv(CSV_FILE)
 
 
-    if data.user_id in df["user_id"].values:
-        raise HTTPException(status_code = 400, deatail= "User already registered.")
+    if data.user_id.strip() in df["user_id"].astype(str).str.strip().values:
+        raise HTTPException(status_code = 400, detail= "User already registered.")
     
     new_entry = pd.DataFrame([{
-        "user_id": data.user_id,
+        "user_id": data.user_id.strip(),
         "monthly_saving": data.monthly_saving,
         "start_date": datetime.today().strftime('%Y-%m-%d')
     }])
@@ -43,10 +46,12 @@ def save_monthly_plan(data: MonthlySavingsRequest):
     return {"message": "Saved successfully", "start_date": new_entry.iloc[0]["start_date"]}
 
 
-# Calculate and return loan amount
+# Calculates and returns loan amount
 @app.post("/loan")
 def calculate_loan(data: LoanRequest):
     df = pd.read_csv(CSV_FILE)
+    print("📄 CSV Content:\n", df)
+
     user_row = df[df["user_id"] == data.user_id]
 
     if user_row.empty:

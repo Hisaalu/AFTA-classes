@@ -4,7 +4,10 @@ import requests
 import os
 
 API_URL = "http://127.0.0.1:8000"
-CSV_FILE = "savings.csv"
+
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+CSV_FILE = os.path.join(BASE_DIR, "../shared_data/savings.csv")
 
 st.set_page_config(page_title="School Loan System")
 st.title("🏫 School Loan Calculator")
@@ -13,7 +16,7 @@ menu = st.sidebar.radio("Select Option", ["Register Savings Plan", "Check Loan E
 
 if menu == "Register Savings Plan":
     st.subheader("📅 Enter Monthly Savings")
-    user_id = st.text_input("User ID")
+    user_id = st.text_input("User ID").strip()
     monthly = st.number_input("Monthly Saving (UGX)", step=1000.0)
 
     if st.button("Save"):
