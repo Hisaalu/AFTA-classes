@@ -7,8 +7,9 @@ import os
 
 app = FastAPI()
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-CSV_FILE = os.path.join(BASE_DIR, "../shared_data/savings.csv")
+SHARED_DIR = "/code/shared_data"
+os.makedirs(SHARED_DIR, exist_ok=True)
+CSV_FILE = os.path.join(SHARED_DIR, "savings.csv")
 
 #print("📁 BACKEND SAVINGS PATH:", CSV_FILE)
 
