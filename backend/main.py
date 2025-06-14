@@ -1,13 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 from datetime import datetime
 import pandas as pd
 import os
-#from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-SHARED_DIR = "/code/shared_data"
+SHARED_DIR = os.path.join(os.path.dirname(__file__), "../shared_data")
 os.makedirs(SHARED_DIR, exist_ok=True)
 CSV_FILE = os.path.join(SHARED_DIR, "savings.csv")
 
@@ -32,8 +31,9 @@ def save_monthly_plan(data: MonthlySavingsRequest):
     df = pd.read_csv(CSV_FILE)
 
 
-    if data.user_id.strip() in df["user_id"].astype(str).str.strip().values:
-        raise HTTPException(status_code = 400, detail= "User already registered.")
+    user_id = data.user_id.strip().lower()
+    if user_id in df["user_id"].astype(str).str.strip().str.lower().values:
+        raise HTTPException(status_code=400, detail="User already registered.")
     
     new_entry = pd.DataFrame([{
         "user_id": data.user_id.strip(),
@@ -51,9 +51,10 @@ def save_monthly_plan(data: MonthlySavingsRequest):
 @app.post("/loan")
 def calculate_loan(data: LoanRequest):
     df = pd.read_csv(CSV_FILE)
-    print("📄 CSV Content:\n", df)
+    user_id = data.user_id.strip().lower()
 
-    user_row = df[df["user_id"] == data.user_id]
+    user_row = df[df["user_id"].astype(str).str.strip().str.lower() == user_id]
+
 
     if user_row.empty:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -75,3 +76,15 @@ def calculate_loan(data: LoanRequest):
         "loan_eligible_amount": loan_amount,
         "start_date": start_date.date()
         }
+
+
+# Expose CSV for download
+@app.get("/csv")
+def get_csv():
+    if not os.path.exists(CSV_FILE):
+        raise HTTPException(status_code=404, detail="CSV not found.")
+    
+    with open(CSV_FILE, "r") as f:
+        content = f.read()
+
+    return Response(content=content, media_type="text/csv")
