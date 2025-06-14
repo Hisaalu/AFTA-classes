@@ -10,8 +10,6 @@ SHARED_DIR = os.path.join(os.path.dirname(__file__), "../shared_data")
 os.makedirs(SHARED_DIR, exist_ok=True)
 CSV_FILE = os.path.join(SHARED_DIR, "savings.csv")
 
-#print("📁 BACKEND SAVINGS PATH:", CSV_FILE)
-
 #creating csv file
 if not os.path.exists(CSV_FILE):
     df = pd.DataFrame(columns = ["user_id", "monthly_saving","start_date"])
@@ -25,7 +23,7 @@ class MonthlySavingsRequest(BaseModel):
 class LoanRequest(BaseModel):
     user_id: str
 
-#saving the users yearly saving
+#saving the users monthly plan
 @app.post("/save")
 def save_monthly_plan(data: MonthlySavingsRequest):
     df = pd.read_csv(CSV_FILE)

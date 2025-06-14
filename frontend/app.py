@@ -7,10 +7,6 @@ from io import StringIO
 API_URL = "https://school-loan-backend.onrender.com"
 #API_URL = "http://127.0.0.1:8000"
 
-
-#BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-#CSV_FILE = os.path.join(BASE_DIR, "../shared_data/savings.csv")
-
 st.set_page_config(page_title="School Loan System")
 st.title("🏫 School Loan Calculator")
 
@@ -31,7 +27,7 @@ if menu == "Register Savings Plan":
                     st.success(res.json()["message"])
                 else:
                     try:
-                        st.error(res.json().get("detail", "Error saving data."))  # CHANGED
+                        st.error(res.json().get("detail", "Error saving data."))
                     except:
                         st.error("Server error.")
             except requests.exceptions.RequestException as e: 
@@ -52,7 +48,7 @@ elif menu == "Check Loan Eligibility":
                     st.success(f"Loan Eligible: UGX {data['loan_eligible_amount']:,.0f}")
                 else:
                     try:
-                        st.error(res.json().get("detail", "Error checking loan."))  # CHANGED
+                        st.error(res.json().get("detail", "Error checking loan."))  
                     except Exception:
                         st.error(f"Server error: {res.status_code}")
             except requests.exceptions.RequestException as e: 
@@ -66,7 +62,7 @@ elif menu == "Download CSV":
             df = pd.read_csv(StringIO(res.text)) 
             st.dataframe(df)
 
-            st.download_button("📤 Download CSV", data=res.content, file_name="savings.csv", mime='text/csv')  # ADDED
+            st.download_button("📤 Download CSV", data=res.content, file_name="savings.csv", mime='text/csv') 
         else:
             st.warning("Unable to fetch CSV from backend.")
     except Exception as e:
