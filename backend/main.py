@@ -1,12 +1,42 @@
 from fastapi import FastAPI, HTTPException, Response
+<<<<<<< HEAD
+from fastapi.middleware.cors import CORSMiddleware
+from auth import router as auth_router
+from fastapi import UploadFile, File
 from pydantic import BaseModel
 from datetime import datetime
+from io import StringIO
+=======
+from pydantic import BaseModel
+from datetime import datetime
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
 import pandas as pd
 import os
 
 app = FastAPI()
 
+<<<<<<< HEAD
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://school-loan-backend.onrender.com"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+#authentication routes
+app.include_router(auth_router)
+
+SHARED_DIR = "/tmp"
+=======
 SHARED_DIR = os.path.join(os.path.dirname(__file__), "../shared_data")
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
 os.makedirs(SHARED_DIR, exist_ok=True)
 CSV_FILE = os.path.join(SHARED_DIR, "savings.csv")
 
@@ -16,6 +46,13 @@ if not os.path.exists(CSV_FILE):
     df.to_csv(CSV_FILE, index = False)
 
 #pydantic models
+<<<<<<< HEAD
+class User(BaseModel):
+    username: str
+    password: str   
+
+=======
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
 class MonthlySavingsRequest(BaseModel):
     user_id: str
     monthly_saving: float
@@ -23,14 +60,30 @@ class MonthlySavingsRequest(BaseModel):
 class LoanRequest(BaseModel):
     user_id: str
 
+<<<<<<< HEAD
+#registering new user
+#@app.post("/register")
+#def register_user(user: User):
+    #return {"message": f"User {user.username} registered successfully"}
+
+#saving the users monthly saving plan
+=======
 #saving the users monthly plan
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
 @app.post("/save")
 def save_monthly_plan(data: MonthlySavingsRequest):
     df = pd.read_csv(CSV_FILE)
 
+<<<<<<< HEAD
+    user_id = data.user_id.strip().lower()
+    df["user_id"] = df["user_id"].astype(str).str.strip().str.lower()
+
+    if user_id in df["user_id"].values:
+=======
 
     user_id = data.user_id.strip().lower()
     if user_id in df["user_id"].astype(str).str.strip().str.lower().values:
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
         raise HTTPException(status_code=400, detail="User already registered.")
     
     new_entry = pd.DataFrame([{
@@ -53,7 +106,10 @@ def calculate_loan(data: LoanRequest):
 
     user_row = df[df["user_id"].astype(str).str.strip().str.lower() == user_id]
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
     if user_row.empty:
         raise HTTPException(status_code=404, detail="User not found.")
     
@@ -75,7 +131,10 @@ def calculate_loan(data: LoanRequest):
         "start_date": start_date.date()
         }
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
 # Expose CSV for download
 @app.get("/csv")
 def get_csv():
@@ -86,3 +145,38 @@ def get_csv():
         content = f.read()
 
     return Response(content=content, media_type="text/csv")
+<<<<<<< HEAD
+
+@app.post("/upload_csv")
+async def upload_csv(file: UploadFile = File(...)):
+    if file.content_type != "text/csv":
+        raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
+    
+    contents = await file.read()
+    try:
+        new_df = pd.read_csv(StringIO(contents.decode("utf-8")))
+
+        # Ensuring required columns exist
+        required_columns = {"user_id", "monthly_saving", "start_date"}
+        if not required_columns.issubset(new_df.columns):
+            raise HTTPException(status_code=400, detail=f"CSV must include columns: {required_columns}")
+
+        # Parsing and cleaning start_date
+        new_df["start_date"] = pd.to_datetime(new_df["start_date"], errors="coerce")
+        new_df = new_df.dropna(subset=["start_date"])
+        new_df["start_date"] = new_df["start_date"].dt.strftime('%Y-%m-%d')
+
+        # Lowercase and strip user_ids
+        new_df["user_id"] = new_df["user_id"].astype(str).str.strip().str.lower()
+
+        # Checking for duplicates within the uploaded file
+        if new_df["user_id"].duplicated().any():
+            raise HTTPException(status_code=400, detail="Uploaded CSV contains duplicate user IDs.")
+        
+        # Saving to CSV
+        new_df.to_csv(CSV_FILE, index=False)
+        return {"message": "CSV uploaded and saved successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing CSV: {e}")
+=======
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b

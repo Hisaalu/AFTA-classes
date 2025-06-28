@@ -3,3 +3,11 @@ uvicorn[standard]
 pydantic
 requests
 pandas
+<<<<<<< HEAD
+passlib
+python-jose
+bcrypt
+
+
+=======
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
