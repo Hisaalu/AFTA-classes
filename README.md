@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🏫 School Loan Calculator System
 
 This is a simple School Loan Calculator web application for schools, designed to encourage saving and support loan issuance based on how much a user has saved. It consists of a **FastAPI** backend and a **Streamlit** frontend. A shared CSV file is used to store data, making the system easy to use and maintain.
@@ -31,3 +32,6 @@ This is a simple School Loan Calculator web application for schools, designed to
 
 ---
 
+=======
+# AFTA-classes
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b

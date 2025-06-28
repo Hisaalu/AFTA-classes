@@ -1,6 +1,10 @@
 streamlit
 requests
+<<<<<<< HEAD
 pandas
 plotly
 python-dotenv
 
+=======
+pandas
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b

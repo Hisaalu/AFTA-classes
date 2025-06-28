@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+#virtual environment
+env/
+
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -191,4 +197,8 @@ cython_debug/
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
+<<<<<<< HEAD
 .cursorindexingignore
+=======
+.cursorindexingignore
+>>>>>>> 9dd52a35cadcf3f1bada7cbc85e3999839bf290b
