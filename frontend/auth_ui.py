@@ -49,11 +49,6 @@ def register(username, password):
             json=payload, headers=headers
         )
 
-        # 🔍 Debug output
-        st.write("Status:", res.status_code)
-        st.write("URL:", res.url)
-
-
         if res.status_code == 200:
             st.success("Registration successful! You can now log in.")
 
@@ -62,6 +57,6 @@ def register(username, password):
                 error = res.json().get("detail", "Registration failed")
             except:
                 error = res.text
-            st.error(f"Error: {error}")
+            st.error(f"{error}")
     except Exception as e:
         st.error(f"Registration error: {e}")

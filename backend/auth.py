@@ -58,9 +58,6 @@ def register_user(user: RegisterRequest):
     df.to_csv(CSV_FILE, index=False)
     return {"message": "User registered successfully."}
 
-print("✅ users.csv now contains:")
-print(pd.read_csv(CSV_FILE))
-
 
 @router.post("/token")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

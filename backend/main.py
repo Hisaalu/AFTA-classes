@@ -48,11 +48,6 @@ class MonthlySavingsRequest(BaseModel):
 class LoanRequest(BaseModel):
     user_id: str
 
-#registering new user
-#@app.post("/register")
-#def register_user(user: User):
-    #return {"message": f"User {user.username} registered successfully"}
-
 #saving the users monthly saving plan
 @app.post("/save")
 def save_monthly_plan(data: MonthlySavingsRequest):
