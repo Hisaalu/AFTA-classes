@@ -1,0 +1,10 @@
+fastapi[standard]
+uvicorn[standard]
+pydantic
+requests
+pandas
+passlib
+python-jose
+bcrypt
+
+
