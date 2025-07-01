@@ -7,7 +7,11 @@ load_dotenv()
 API_URL = os.getenv("API_URL")
 
 def show_auth_sidebar():
-    st.sidebar.title("🔐 Authentication")
+    st.sidebar.title("Authentication")
+
+    if st.session_state.get("logged_out"):
+        st.success("You have been logged out.")
+        del st.session_state["logged_out"]
 
     if "token" not in st.session_state:
         option = st.sidebar.radio("Choose:", ["Login", "Register"])
@@ -22,20 +26,8 @@ def show_auth_sidebar():
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
         if st.sidebar.button("Logout"):
             st.session_state.clear()
+            st.session_state["logged_out"] = True
             st.rerun()
-
-def login(username, password):
-    try:
-        res = requests.post(f"{API_URL}/token", data={"username": username, "password": password})
-        if res.status_code == 200:
-            st.session_state["token"] = res.json()["access_token"]
-            st.session_state["username"] = username
-            st.success("Logged in successfully")
-            st.rerun()
-        else:
-            st.error("Invalid credentials")
-    except Exception as e:
-        st.error(f"Login failed: {e}")
 
 def register(username, password):
     try:
@@ -60,3 +52,24 @@ def register(username, password):
             st.error(f"{error}")
     except Exception as e:
         st.error(f"Registration error: {e}")
+
+def login(username, password):
+    try:
+        res = requests.post(f"{API_URL}/token", data={"username": username, "password": password})
+        if res.status_code == 200:
+            st.session_state["token"] = res.json()["access_token"]
+            st.session_state["username"] = username
+            st.success("Logged in successfully")
+            st.rerun()
+        else:
+            st.error("Invalid credentials")
+    except Exception as e:
+        st.error(f"Login failed: {e}")
+
+def logout():
+    st.session_state.clear()
+    st.session_state["logged_out"] = True
+    st.success("You have been logged out.")
+    st.rerun()
+
+
